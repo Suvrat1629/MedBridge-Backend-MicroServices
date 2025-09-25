@@ -1,0 +1,65 @@
+# Application Configuration
+spring:
+  application:
+    name: fhir-service
+  codec:
+    max-in-memory-size: 100MB
+
+# Server Configuration
+server:
+  port: 8083
+
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    # Use IP address instead of hostname
+    prefer-ip-address: true
+    # Override hostname to use localhost
+    hostname: localhost
+    # Use simple instance ID
+    instance-id: ${spring.application.name}:${server.port}
+    # Lease renewal and expiration
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    # Health check
+    health-check-url-path: /actuator/health
+    status-page-url-path: /actuator/info
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging Configuration
+logging:
+  level:
+    com.example.fhir_service: INFO
+    org.springframework.web: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+
+# FHIR Configuration
+fhir:
+  server:
+    name: Namaste FHIR Terminology Server
+    version: 1.0.0
+    description: FHIR R4 compliant terminology service for traditional medicine codes
+
+# Service Configuration - using Eureka service names
+terminology-service:
+  base-url: http://terminology-service
+  timeout:
+    connection: 5000
+    read: 30000

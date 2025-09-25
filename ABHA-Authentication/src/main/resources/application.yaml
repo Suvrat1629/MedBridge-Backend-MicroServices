@@ -1,0 +1,47 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: authentication-service
+  data:
+    mongodb:
+      uri: mongodb+srv://ramakanta:ramakanta@cluster0.qamg2kd.mongodb.net/traditional_medicine_db
+
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+# ABHA Configuration
+abha:
+  base-url: https://sandbox.abdm.gov.in
+  client-id: your_client_id
+  client-secret: your_client_secret
+  x-hip-id: your_hip_id
+  auth-token: your_auth_token
+  otp-validity-minutes: 10
+  max-retry-attempts: 3
+  connection-timeout-seconds: 30
+  read-timeout-seconds: 60
+
+# JWT Configuration
+jwt:
+  secret: mySecretKey
+  expiration: 86400000  # 24 hours
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
