@@ -14,5 +14,22 @@ services:
       timeout: 10s
       retries: 3
 
+  # Zipkin Tracing Server
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: namaste-zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+      - JAVA_OPTS=-Xms512m -Xmx512m
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:9411/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
 volumes:
   redis-data:

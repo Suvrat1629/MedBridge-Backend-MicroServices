@@ -17,16 +17,11 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
   instance:
-    # Use IP address instead of hostname
     prefer-ip-address: true
-    # Override hostname to use localhost
     hostname: localhost
-    # Use simple instance ID
     instance-id: ${spring.application.name}:${server.port}
-    # Lease renewal and expiration
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
-    # Health check
     health-check-url-path: /actuator/health
     status-page-url-path: /actuator/info
 
@@ -35,20 +30,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
-
-# Logging Configuration
-logging:
-  level:
-    com.example.fhir_service: INFO
-    org.springframework.web: DEBUG
-    org.springframework.cloud.loadbalancer: DEBUG
-    org.springframework.web.reactive.function.client: DEBUG
-    com.netflix.eureka: INFO
-    com.netflix.discovery: INFO
+        include: health,info,metrics,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
 
 # FHIR Configuration
 fhir:

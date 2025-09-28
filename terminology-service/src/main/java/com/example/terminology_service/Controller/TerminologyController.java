@@ -3,8 +3,14 @@ package com.example.terminology_service.Controller;
 import com.example.terminology_service.Model.NamasteCode;
 import com.example.terminology_service.Service.NamasteTerminologyService;
 import com.example.terminology_service.Dto.TerminologyResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,17 +25,73 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
-@Tag(name = "Terminology API", description = "Traditional Medicine to ICD-11 TM2 Code Mapping")
+@Tag(name = "Terminology API", description = "Traditional Medicine to ICD-11 TM2 Code Mapping Service for NAMASTE Healthcare System")
 public class TerminologyController {
 
     private final NamasteTerminologyService terminologyService;
 
     @GetMapping("/search/code/{codeValue}")
-    @Operation(summary = "Search by Code",
-            description = "Search for traditional medicine codes or TM2 codes. Searches in both tm2_code and code fields.")
-    // Removed @Cacheable from here
+    @Operation(
+            summary = "Search by Medical Code",
+            description = "Search for traditional medicine codes or ICD-11 TM2 codes. Searches in both tm2_code and code fields to provide comprehensive code mapping.",
+            tags = {"Code Search"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully found matching codes",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TerminologyResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Successful Code Search",
+                                    value = "{\n" +
+                                            "  \"success\": true,\n" +
+                                            "  \"data\": [\n" +
+                                            "    {\n" +
+                                            "      \"id\": \"507f1f77bcf86cd799439011\",\n" +
+                                            "      \"code\": \"NAM001\",\n" +
+                                            "      \"tm2_code\": \"XM4KH5\",\n" +
+                                            "      \"code_description\": \"Fever with headache\",\n" +
+                                            "      \"tm2_definition\": \"Traditional medicine pattern for fever with accompanying headache\",\n" +
+                                            "      \"category\": \"ayurveda\"\n" +
+                                            "    }\n" +
+                                            "  ],\n" +
+                                            "  \"message\": \"Search completed successfully\",\n" +
+                                            "  \"timestamp\": \"2024-01-15T10:30:00Z\"\n" +
+                                            "}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Code not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Code Not Found",
+                                    value = "{\n" +
+                                            "  \"success\": false,\n" +
+                                            "  \"data\": null,\n" +
+                                            "  \"message\": \"Code not found: INVALID123\",\n" +
+                                            "  \"errorCode\": \"NOT_FOUND\",\n" +
+                                            "  \"timestamp\": \"2024-01-15T10:30:00Z\"\n" +
+                                            "}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error during search",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     public ResponseEntity<TerminologyResponse<List<NamasteCode>>> searchByCode(
-            @Parameter(description = "Code to search (e.g., NAM001 or XM4KH5)", required = true)
+            @Parameter(
+                    description = "Medical code to search for (supports both traditional medicine codes and TM2 codes)",
+                    example = "NAM001",
+                    required = true
+            )
             @PathVariable String codeValue) {
 
         log.info("Code search request for: {}", codeValue);
@@ -49,10 +111,51 @@ public class TerminologyController {
     }
 
     @GetMapping("/search/symptoms")
-    @Operation(summary = "Search by Symptoms",
-            description = "Search for codes based on symptoms or descriptions using fuzzy matching.")
+    @Operation(
+            summary = "Search by Symptoms",
+            description = "Search for medical codes based on symptoms or clinical descriptions using advanced fuzzy matching algorithms. Supports multiple symptoms and partial matching.",
+            tags = {"Symptom Search"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully found matching codes based on symptoms",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TerminologyResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Symptom Search Results",
+                                    value = "{\n" +
+                                            "  \"success\": true,\n" +
+                                            "  \"data\": [\n" +
+                                            "    {\n" +
+                                            "      \"id\": \"507f1f77bcf86cd799439011\",\n" +
+                                            "      \"code\": \"NAM001\",\n" +
+                                            "      \"tm2_code\": \"XM4KH5\",\n" +
+                                            "      \"code_description\": \"Fever with headache and nausea\",\n" +
+                                            "      \"tm2_definition\": \"Pitta imbalance causing fever with head pain\",\n" +
+                                            "      \"category\": \"ayurveda\",\n" +
+                                            "      \"match_score\": 0.85\n" +
+                                            "    }\n" +
+                                            "  ],\n" +
+                                            "  \"message\": \"Found 1 matching codes\",\n" +
+                                            "  \"timestamp\": \"2024-01-15T10:30:00Z\"\n" +
+                                            "}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid query parameter",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     public ResponseEntity<TerminologyResponse<List<NamasteCode>>> searchBySymptoms(
-            @Parameter(description = "Symptom or description to search (e.g., fever, headache)", required = true)
+            @Parameter(
+                    description = "Symptom or clinical description to search for. Supports multiple keywords and partial matching.",
+                    example = "fever headache",
+                    required = true
+            )
             @RequestParam String query) {
 
         log.info("Symptom search request for: {}", query);
@@ -67,12 +170,54 @@ public class TerminologyController {
     }
 
     @GetMapping("/autocomplete")
-    @Operation(summary = "Auto-complete Search",
-            description = "Get auto-complete suggestions for traditional medicine codes.")
+    @Operation(
+            summary = "Auto-complete Search",
+            description = "Get intelligent auto-complete suggestions for traditional medicine codes and descriptions. Useful for building search interfaces with real-time suggestions.",
+            tags = {"Search Assistance"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully returned auto-complete suggestions",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TerminologyResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Auto-complete Results",
+                                    value = "{\n" +
+                                            "  \"success\": true,\n" +
+                                            "  \"data\": [\n" +
+                                            "    {\n" +
+                                            "      \"id\": \"507f1f77bcf86cd799439011\",\n" +
+                                            "      \"code\": \"NAM001\",\n" +
+                                            "      \"code_description\": \"Fever with headache\",\n" +
+                                            "      \"category\": \"ayurveda\"\n" +
+                                            "    },\n" +
+                                            "    {\n" +
+                                            "      \"id\": \"507f1f77bcf86cd799439012\",\n" +
+                                            "      \"code\": \"NAM002\",\n" +
+                                            "      \"code_description\": \"Fever with body ache\",\n" +
+                                            "      \"category\": \"ayurveda\"\n" +
+                                            "    }\n" +
+                                            "  ],\n" +
+                                            "  \"message\": \"Auto-complete suggestions retrieved\",\n" +
+                                            "  \"timestamp\": \"2024-01-15T10:30:00Z\"\n" +
+                                            "}"
+                            )
+                    )
+            )
+    })
     public ResponseEntity<TerminologyResponse<List<NamasteCode>>> autoComplete(
-            @Parameter(description = "Search term for auto-complete", required = true)
+            @Parameter(
+                    description = "Search term for auto-complete suggestions",
+                    example = "fever",
+                    required = true
+            )
             @RequestParam String query,
-            @Parameter(description = "Maximum number of results to return")
+            @Parameter(
+                    description = "Maximum number of suggestions to return",
+                    example = "10"
+            )
             @RequestParam(defaultValue = "10") int limit) {
 
         log.info("Auto-complete request for query: {} with limit: {}", query, limit);
@@ -87,10 +232,54 @@ public class TerminologyController {
     }
 
     @GetMapping("/category/{categoryType}")
-    @Operation(summary = "Search by Category",
-            description = "Get codes by traditional medicine category (ayurveda, siddha, unani).")
+    @Operation(
+            summary = "Search by Traditional Medicine Category",
+            description = "Retrieve medical codes filtered by traditional medicine system category. Supports Ayurveda, Siddha, Unani, and other traditional medicine systems.",
+            tags = {"Category Search"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved codes for the specified category",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TerminologyResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Category Search Results",
+                                    value = "{\n" +
+                                            "  \"success\": true,\n" +
+                                            "  \"data\": [\n" +
+                                            "    {\n" +
+                                            "      \"id\": \"507f1f77bcf86cd799439011\",\n" +
+                                            "      \"code\": \"AYU001\",\n" +
+                                            "      \"tm2_code\": \"XM4KH5\",\n" +
+                                            "      \"code_description\": \"Vata dosha imbalance\",\n" +
+                                            "      \"tm2_definition\": \"Wind element disorder in Ayurvedic medicine\",\n" +
+                                            "      \"category\": \"ayurveda\"\n" +
+                                            "    }\n" +
+                                            "  ],\n" +
+                                            "  \"message\": \"Retrieved 1 codes for category: ayurveda\",\n" +
+                                            "  \"timestamp\": \"2024-01-15T10:30:00Z\"\n" +
+                                            "}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid category type",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     public ResponseEntity<TerminologyResponse<List<NamasteCode>>> getByCategory(
-            @Parameter(description = "Category type (ayurveda, siddha, unani)", required = true)
+            @Parameter(
+                    description = "Traditional medicine category type",
+                    example = "ayurveda",
+                    required = true,
+                    schema = @Schema(
+                            type = "string",
+                            allowableValues = {"ayurveda", "siddha", "unani", "homeopathy", "yoga", "naturopathy"}
+                    )
+            )
             @PathVariable String categoryType) {
 
         log.info("Category search request for: {}", categoryType);
@@ -104,8 +293,13 @@ public class TerminologyController {
         }
     }
 
+    @Hidden
     @GetMapping("/health")
-    @Operation(summary = "Health Check", description = "Check if the terminology service is running.")
+    @Operation(
+            summary = "Health Check",
+            description = "Internal health check endpoint for service monitoring",
+            tags = {"Internal"}
+    )
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of(
                 "status", "UP",

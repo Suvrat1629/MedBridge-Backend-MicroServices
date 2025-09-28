@@ -37,14 +37,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
-
-# Logging Configuration
-logging:
-  level:
-    com.example.spring_auth: DEBUG
-    com.example.spring_auth.service: DEBUG
-    org.springframework.data.mongodb: DEBUG
+        include: health,info,metrics,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
