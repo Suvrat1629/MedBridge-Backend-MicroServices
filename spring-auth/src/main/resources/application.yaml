@@ -1,27 +1,12 @@
 # Application Configuration
 spring:
   application:
-    name: spring-auth  # CHANGE THIS - it was set to api-gateway
+    name: spring-auth
 
-  # Database Configuration (H2 for testing)
-  datasource:
-    url: jdbc:h2:mem:authdb
-    driver-class-name: org.h2.Driver
-    username: aneesh
-    password: aneesh
-
-  # JPA Configuration
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-
-  # H2 Console (for testing)
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb+srv://ramakanta:ramakanta@cluster0.qamg2kd.mongodb.net/bhajiya_users?retryWrites=true&w=majority
 
 # Server Configuration
 server:
@@ -62,4 +47,4 @@ logging:
   level:
     com.example.spring_auth: DEBUG
     com.example.spring_auth.service: DEBUG
-
+    org.springframework.data.mongodb: DEBUG

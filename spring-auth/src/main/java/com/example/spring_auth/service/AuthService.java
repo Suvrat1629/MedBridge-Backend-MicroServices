@@ -63,6 +63,7 @@ public class AuthService {
         return new AuthResponse(accessToken, refreshToken, "Bearer", 3600L, userInfo);
     }
 
+
     public AuthResponse register(RegisterRequest request) {
         log.info("Registration attempt for user: {}", request.getUsername());
 
