@@ -9,6 +9,8 @@
         <option value="$PROJECT_DIR$/ABHA-Authentication/pom.xml" />
         <option value="$PROJECT_DIR$/terminology-service/pom.xml" />
         <option value="$PROJECT_DIR$/fhir-service/pom.xml" />
+        <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/spring-auth/pom.xml" />
       </list>
     </option>
   </component>

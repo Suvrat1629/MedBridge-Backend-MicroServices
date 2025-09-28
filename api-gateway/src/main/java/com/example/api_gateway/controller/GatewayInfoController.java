@@ -1,0 +1,40 @@
+package com.example.api_gateway.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/gateway")
+@Slf4j
+public class GatewayInfoController {
+
+    @GetMapping("/health")
+    public Map<String, Object> health() {
+        Map<String, Object> health = new HashMap<>();
+        health.put("status", "UP");
+        health.put("service", "api-gateway");
+        health.put("timestamp", System.currentTimeMillis());
+        return health;
+    }
+
+    @GetMapping("/info")
+    public Map<String, Object> info() {
+        Map<String, Object> info = new HashMap<>();
+        info.put("name", "Namaste API Gateway");
+        info.put("version", "2.0.0");
+        info.put("description", "New WebFlux Gateway for Namaste Microservices");
+
+        Map<String, String> routes = new HashMap<>();
+        routes.put("Authentication", "/api/auth/** → http://localhost:8084");
+        routes.put("FHIR (Protected)", "/api/fhir/** → http://localhost:8083");
+        routes.put("Terminology", "/api/terminology/** → http://localhost:8082");
+
+        info.put("routes", routes);
+        return info;
+    }
+}
