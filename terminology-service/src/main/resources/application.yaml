@@ -6,7 +6,7 @@ spring:
     name: terminology-service
   data:
     mongodb:
-      uri: mongodb+srv://ramakanta:ramakanta@cluster0.qamg2kd.mongodb.net/traditional_medicine_db
+      uri: mongo-uri
     redis:
       host: localhost
       port: 6379

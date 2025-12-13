@@ -6,7 +6,7 @@ spring:
   # MongoDB Configuration
   data:
     mongodb:
-      uri: mongodb+srv://ramakanta:ramakanta@cluster0.qamg2kd.mongodb.net/bhajiya_users?retryWrites=true&w=majority
+      uri: mongo-uri
 
 # Server Configuration
 server:

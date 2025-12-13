@@ -6,7 +6,7 @@ spring:
     name: authentication-service
   data:
     mongodb:
-      uri: mongodb+srv://ramakanta:ramakanta@cluster0.qamg2kd.mongodb.net/traditional_medicine_db
+      uri: mongodb-uri
 
 # Eureka Configuration
 eureka:
