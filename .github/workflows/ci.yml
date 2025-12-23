@@ -24,39 +24,26 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Cache m2 repository (fallback)
+      - name: Cache m2 repository
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-m2-
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
 
-      - name: List service folder
-        run: |
-          echo "Building service: ${{ matrix.service }}"
-          ls -la "${{ matrix.service }}"
-
-      - name: Make mvnw executable
-        run: |-
-          if [ -f ./mvnw ]; then chmod +x ./mvnw; fi
+      - name: Make root mvnw executable
+        run: chmod +x ./mvnw || true
 
       - name: Build & test service
         working-directory: ${{ matrix.service }}
         run: |
-          # Use the project's wrapper when available, otherwise use mvn
-          if [ -f ../mvnw ] && [ -f ../mvnw.cmd ]; then
-            echo "Using root mvnw"
-            ../mvnw -B -ntp -DskipTests=false verify
-          elif [ -f ./mvnw ]; then
-            ./mvnw -B -ntp -DskipTests=false verify
-          else
-            mvn -B -ntp -DskipTests=false verify
-          fi
+          echo "Building service: ${{ matrix.service }}"
+          # Prefer root wrapper (standard for monorepos)
+          ../mvnw -B -ntp clean verify
 
       - name: Archive test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.service }}
-          path: ${{ matrix.service }}/target/surefire-reports/**, ${{ matrix.service }}/target/failsafe-reports/**
+          name: test-reports-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/surefire-reports/*.xml, ${{ matrix.service }}/target/failsafe-reports/*.xml
