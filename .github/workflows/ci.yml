@@ -31,15 +31,17 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      - name: Make root mvnw executable
-        run: chmod +x ./mvnw || true
-
       - name: Build & test service
         working-directory: ${{ matrix.service }}
         run: |
           echo "Building service: ${{ matrix.service }}"
-          # Prefer root wrapper (standard for monorepos)
-          ../mvnw -B -ntp clean verify
+          # Use the module mvnw if present, otherwise fall back to system mvn
+          if [ -f ./mvnw ]; then
+            chmod +x ./mvnw || true
+            ./mvnw -B -ntp clean verify
+          else
+            mvn -B -ntp clean verify
+          fi
 
       - name: Archive test reports
         if: always()
