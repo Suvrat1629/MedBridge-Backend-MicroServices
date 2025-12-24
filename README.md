@@ -72,3 +72,7 @@ grep -Rni --exclude-dir=target --exclude-dir=.git "actuator" .
 - This README documents only items present in the repository as-is.  
 - To inspect per-service config, open `src/main/resources/application*.yml` in each module.  
 - Use the module `pom.xml` files to verify dependencies and actuator/tracing integrations.
+
+## License
+
+This project is licensed under the MIT License — see the `LICENSE` file for details.
