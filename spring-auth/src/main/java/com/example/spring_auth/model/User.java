@@ -31,8 +31,6 @@ public class User {
 
     private String phoneNumber;
 
-    private String abhaNumber; // For future ABHA integration
-
     private Set<Role> roles;
 
     private Boolean isActive = true;

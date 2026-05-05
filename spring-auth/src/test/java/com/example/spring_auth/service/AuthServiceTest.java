@@ -49,8 +49,6 @@ public class AuthServiceTest {
         user.setUsername("alice");
         user.setEmail("a@ex.com");
         user.setFullName("Alice");
-        user.setAbhaNumber("ABHA123");
-        // User.setRoles expects a List<User.Role>
         user.setRoles(Set.of(User.Role.PATIENT));
         user.setLastLogin(LocalDateTime.now());
 
@@ -93,7 +91,6 @@ public class AuthServiceTest {
         user.setUsername("carol");
         user.setEmail("c@ex.com");
         user.setFullName("Carol");
-        user.setAbhaNumber("ABHA-C");
         user.setRoles(Set.of(User.Role.PATIENT));
 
         when(userRepository.findByUsername("carol")).thenReturn(Optional.of(user));

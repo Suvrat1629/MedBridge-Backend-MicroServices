@@ -26,8 +26,6 @@ public class RegisterRequest {
     private String fullName;
     
     private String phoneNumber;
-    
-    private String abhaNumber; // Optional for now
-    
+
     private Set<User.Role> roles = Set.of(User.Role.PATIENT); // Default role
 }

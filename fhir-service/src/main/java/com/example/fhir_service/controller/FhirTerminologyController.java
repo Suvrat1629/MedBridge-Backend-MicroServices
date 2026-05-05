@@ -4,13 +4,7 @@ import com.example.fhir_service.service.TerminologyFhirService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.*;
@@ -24,14 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * FHIR R4-COMPLIANT Controller for terminology requirements
- * ALL responses are proper FHIR resources with correct content-type
- * Delegates data operations to terminology-service via internal API
- */
 @RestController
 @RequestMapping("/api/fhir")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "FHIR Terminology", description = "FHIR R4 compliant terminology operations for traditional medicine codes and ICD-11 TM2 mappings")
@@ -51,49 +39,6 @@ public class FhirTerminologyController {
             description = "Searches for terminology entries using medical codes. Searches in both tm2_code and code fields and returns FHIR Parameters resource with matching results.",
             tags = {"Code Search"}
     )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully found terminology entries for the given code",
-                    content = @Content(
-                            mediaType = "application/fhir+json;fhirVersion=4.0",
-                            schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(
-                                    name = "Search Results",
-                                    value = "{\n" +
-                                            "  \"resourceType\": \"Parameters\",\n" +
-                                            "  \"id\": \"search-result-123\",\n" +
-                                            "  \"parameter\": [\n" +
-                                            "    {\n" +
-                                            "      \"name\": \"result\",\n" +
-                                            "      \"part\": [\n" +
-                                            "        {\"name\": \"code\", \"valueString\": \"A01.1\"},\n" +
-                                            "        {\"name\": \"tm2_code\", \"valueString\": \"TM2.001.001\"},\n" +
-                                            "        {\"name\": \"description\", \"valueString\": \"Fever with headache\"}\n" +
-                                            "      ]\n" +
-                                            "    }\n" +
-                                            "  ]\n" +
-                                            "}"
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid code format or search failed",
-                    content = @Content(
-                            mediaType = "application/fhir+json;fhirVersion=4.0",
-                            schema = @Schema(implementation = String.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "No terminology entries found for the given code",
-                    content = @Content(
-                            mediaType = "application/fhir+json;fhirVersion=4.0",
-                            schema = @Schema(implementation = String.class)
-                    )
-            )
-    })
     @GetMapping(value = "/search/code/{codeValue}", produces = FHIR_JSON_CONTENT_TYPE)
     public ResponseEntity<String> searchByCode(
             @Parameter(
@@ -125,18 +70,6 @@ public class FhirTerminologyController {
             description = "Searches for terminology entries using TM2 codes specifically (ICD-11 Traditional Medicine codes).",
             tags = {"Code Search"}
     )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully found terminology entries for the given TM2 code",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid TM2 code format",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            )
-    })
     @GetMapping(value = "/search/tm2code/{codeValue}", produces = FHIR_JSON_CONTENT_TYPE)
     public ResponseEntity<String> searchByTm2Code(
             @Parameter(
@@ -168,18 +101,6 @@ public class FhirTerminologyController {
             description = "Searches for terminology entries using standard medical codes (non-TM2 codes).",
             tags = {"Code Search"}
     )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully found terminology entries for the given code",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid code format",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            )
-    })
     @GetMapping(value = "/search/codeonly/{codeValue}", produces = FHIR_JSON_CONTENT_TYPE)
     public ResponseEntity<String> searchByCodeOnly(
             @Parameter(
@@ -212,39 +133,6 @@ public class FhirTerminologyController {
             description = "Searches for terminology entries based on symptoms. Accepts comma-separated or space-separated symptoms as query parameter. Returns the best matching terminology entry with detailed FHIR Parameters.",
             tags = {"Symptom Search"}
     )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully found terminology entries matching the symptoms",
-                    content = @Content(
-                            mediaType = "application/fhir+json;fhirVersion=4.0",
-                            schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(
-                                    name = "Symptom Search Results",
-                                    value = "{\n" +
-                                            "  \"resourceType\": \"Parameters\",\n" +
-                                            "  \"id\": \"symptom-search-456\",\n" +
-                                            "  \"parameter\": [\n" +
-                                            "    {\n" +
-                                            "      \"name\": \"best_match\",\n" +
-                                            "      \"part\": [\n" +
-                                            "        {\"name\": \"match_score\", \"valueDecimal\": 0.85},\n" +
-                                            "        {\"name\": \"code\", \"valueString\": \"A01.1\"},\n" +
-                                            "        {\"name\": \"tm2_code\", \"valueString\": \"TM2.001.001\"},\n" +
-                                            "        {\"name\": \"description\", \"valueString\": \"Fever with headache and nausea\"}\n" +
-                                            "      ]\n" +
-                                            "    }\n" +
-                                            "  ]\n" +
-                                            "}"
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid symptoms query or search failed",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            )
-    })
     @GetMapping(value = "/search/symptoms", produces = FHIR_JSON_CONTENT_TYPE)
     public ResponseEntity<String> searchBySymptoms(
             @Parameter(
@@ -279,18 +167,6 @@ public class FhirTerminologyController {
             description = "Searches for terminology entries based on symptoms provided as JSON array. Allows for more complex symptom queries and better handling of multi-word symptoms.",
             tags = {"Symptom Search"}
     )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully found terminology entries matching the symptoms",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid request body or symptoms array missing",
-                    content = @Content(mediaType = "application/fhir+json;fhirVersion=4.0")
-            )
-    })
     @PostMapping(value = "/search/symptoms", produces = FHIR_JSON_CONTENT_TYPE, consumes = "application/json")
     public ResponseEntity<String> searchBySymptomsPost(
             @Parameter(

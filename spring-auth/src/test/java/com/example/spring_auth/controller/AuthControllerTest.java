@@ -31,7 +31,7 @@ public class AuthControllerTest {
         req.setPassword("pw");
 
         AuthResponse ar = new AuthResponse("A", "R", "Bearer", 3600L,
-                new AuthResponse.UserInfo("id","alice","a@e","Alice","ABHA", Set.of(User.Role.PATIENT)));
+                new AuthResponse.UserInfo("id","alice","a@e","Alice", Set.of(User.Role.PATIENT)));
         when(authService.login(req)).thenReturn(ar);
 
         ResponseEntity<AuthResponse> resp = controller.login(req);
@@ -75,7 +75,7 @@ public class AuthControllerTest {
     public void testRefreshToken_ok_and_health() {
         Map<String,String> req = Map.of("refreshToken", "RTOK");
         AuthResponse ar = new AuthResponse("A", "R", "Bearer", 3600L,
-                new AuthResponse.UserInfo("id","u","e","U","ABHA", Set.of(User.Role.PATIENT)));
+                new AuthResponse.UserInfo("id","u","e","U", Set.of(User.Role.PATIENT)));
         when(authService.refreshToken("RTOK")).thenReturn(ar);
 
         ResponseEntity<AuthResponse> resp = controller.refreshToken(req);

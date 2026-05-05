@@ -1,4 +1,4 @@
-package com.example.terminology_service.Dto;
+package com.example.terminology_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

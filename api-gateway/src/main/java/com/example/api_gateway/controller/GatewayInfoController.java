@@ -30,9 +30,9 @@ public class GatewayInfoController {
         info.put("description", "New WebFlux Gateway for Namaste Microservices");
 
         Map<String, String> routes = new HashMap<>();
-        routes.put("Authentication", "/api/auth/** → http://localhost:8084");
-        routes.put("FHIR (Protected)", "/api/fhir/** → http://localhost:8083");
-        routes.put("Terminology", "/api/terminology/** → http://localhost:8082");
+        routes.put("Authentication", "/api/auth/** → lb://spring-auth");
+        routes.put("FHIR (Protected)", "/api/fhir/** → lb://fhir-service");
+        routes.put("Terminology", "/api/terminology/** → lb://terminology-service");
 
         info.put("routes", routes);
         return info;

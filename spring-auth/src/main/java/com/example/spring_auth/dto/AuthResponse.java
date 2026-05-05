@@ -22,7 +22,6 @@ public class AuthResponse {
         private String username;
         private String email;
         private String fullName;
-        private String abhaNumber;
         private Set<User.Role> roles;
     }
 }

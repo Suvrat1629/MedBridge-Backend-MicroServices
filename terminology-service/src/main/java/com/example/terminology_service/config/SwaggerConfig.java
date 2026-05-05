@@ -1,4 +1,4 @@
-package com.example.terminology_service.Config;
+package com.example.terminology_service.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;

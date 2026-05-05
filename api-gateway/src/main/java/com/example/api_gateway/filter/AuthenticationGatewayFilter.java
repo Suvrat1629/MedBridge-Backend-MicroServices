@@ -30,53 +30,38 @@ public class AuthenticationGatewayFilter extends AbstractGatewayFilterFactory<Au
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
 
-            log.info("🔒 Checking authentication for: {}", path);
+            log.info("Checking auth for: {}", path);
 
-            // Extract Authorization header
             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                log.warn("❌ Missing authorization header");
+                log.warn("Missing or invalid authorization header");
                 return handleUnauthorized(exchange, "Missing or invalid authorization header");
             }
 
-            log.info("🔍 Validating token...");
-
-            // Validate token with spring-auth service
             return validateToken(authHeader)
                     .flatMap(isValid -> {
                         if (isValid) {
-                            log.info("✅ Token is valid - allowing request");
                             return chain.filter(exchange);
                         } else {
-                            log.warn("❌ Token is invalid");
+                            log.warn("Invalid token rejected for path: {}", path);
                             return handleUnauthorized(exchange, "Invalid token");
                         }
                     })
                     .onErrorResume(error -> {
-                        log.error("💥 Authentication error: {}", error.getMessage());
+                        log.error("Auth service error for path {}: {}", path, error.getMessage());
                         return handleUnauthorized(exchange, "Authentication service error");
                     });
         };
     }
 
     private Mono<Boolean> validateToken(String authHeader) {
-        log.info("🌐 Calling spring-auth service at: http://localhost:8084/token/validate");
-
-        WebClient webClient = WebClient.builder()
-                .baseUrl("http://localhost:8084")
-                .build();
-
-        return webClient
+        return webClientBuilder.build()
                 .post()
-                .uri("/token/validate")
+                .uri("lb://spring-auth/api/auth/validate-token")
                 .header(HttpHeaders.AUTHORIZATION, authHeader)
                 .retrieve()
                 .bodyToMono(TokenValidationResponse.class)
-                .map(response -> {
-                    log.info("🔍 Token validation response: valid={}, username={}",
-                            response.isValid(), response.getUsername());
-                    return response.isValid();
-                })
+                .map(TokenValidationResponse::isValid)
                 .onErrorReturn(false);
     }
 
