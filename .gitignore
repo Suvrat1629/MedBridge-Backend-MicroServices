@@ -3,9 +3,13 @@ target/
 *.class
 *.jar
 !**/src/main/**/*.jar
+!**/gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
-.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
 
 # IDE - IntelliJ
 .idea/

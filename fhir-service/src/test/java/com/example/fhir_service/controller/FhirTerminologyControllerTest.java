@@ -58,7 +58,7 @@ public class FhirTerminologyControllerTest {
     @Test
     public void testSearchByCode_returnsFhirJsonAndHeaders() {
         ResponseEntity<String> resp = controller.searchByCode("A01.1").block();
-        assertEquals(200, resp.getStatusCodeValue());
+        assertEquals(200, resp.getStatusCode().value());
         assertNotNull(resp.getHeaders().getContentType());
         assertEquals("application/fhir+json;fhirVersion=4.0", resp.getHeaders().getContentType().toString());
         assertNotNull(resp.getBody());
@@ -70,8 +70,8 @@ public class FhirTerminologyControllerTest {
     public void testSearchByTm2Code_and_CodeOnly_return200() {
         ResponseEntity<String> r1 = controller.searchByTm2Code("TM2.TEST").block();
         ResponseEntity<String> r2 = controller.searchByCodeOnly("A01.1").block();
-        assertEquals(200, r1.getStatusCodeValue());
-        assertEquals(200, r2.getStatusCodeValue());
+        assertEquals(200, r1.getStatusCode().value());
+        assertEquals(200, r2.getStatusCode().value());
         assertTrue(r1.getBody().contains("\"resourceType\":\"Parameters\""));
         assertTrue(r2.getBody().contains("\"resourceType\":\"Parameters\""));
     }
@@ -79,24 +79,24 @@ public class FhirTerminologyControllerTest {
     @Test
     public void testSearchBySymptoms_get_and_post() {
         ResponseEntity<String> getResp = controller.searchBySymptoms("fever,headache").block();
-        assertEquals(200, getResp.getStatusCodeValue());
+        assertEquals(200, getResp.getStatusCode().value());
         assertTrue(getResp.getBody().contains("\"resourceType\":\"Parameters\""));
 
         Map<String, List<String>> body = Map.of("symptoms", List.of("fever", "nausea"));
         ResponseEntity<String> postResp = controller.searchBySymptomsPost(body).block();
-        assertEquals(200, postResp.getStatusCodeValue());
+        assertEquals(200, postResp.getStatusCode().value());
         assertTrue(postResp.getBody().contains("\"resourceType\":\"Parameters\""));
     }
 
     @Test
     public void testMetadata_and_Health() {
         ResponseEntity<String> meta = controller.getCapabilityStatement().block();
-        assertEquals(200, meta.getStatusCodeValue());
+        assertEquals(200, meta.getStatusCode().value());
         assertNotNull(meta.getBody());
         assertTrue(meta.getBody().contains("\"resourceType\":\"CapabilityStatement\""));
 
         ResponseEntity<Map<String, Object>> health = controller.health().block();
-        assertEquals(200, health.getStatusCodeValue());
+        assertEquals(200, health.getStatusCode().value());
         assertNotNull(health.getBody());
         assertEquals("UP", health.getBody().get("status"));
         assertEquals("fhir-service", health.getBody().get("service"));

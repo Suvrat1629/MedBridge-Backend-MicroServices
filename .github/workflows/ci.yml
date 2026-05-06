@@ -23,20 +23,18 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-          cache: maven
+          cache: gradle
 
       - name: Build & test service
         working-directory: ${{ matrix.service }}
         run: |
-          chmod +x ./mvnw
-          ./mvnw -B -ntp clean verify
+          chmod +x ./gradlew
+          ./gradlew clean test
 
       - name: Archive test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports-${{ matrix.service }}
-          path: |
-            ${{ matrix.service }}/target/surefire-reports/*.xml
-            ${{ matrix.service }}/target/failsafe-reports/*.xml
+          path: ${{ matrix.service }}/build/test-results/test/*.xml
           if-no-files-found: ignore

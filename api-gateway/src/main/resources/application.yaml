@@ -1,9 +1,7 @@
-# Application Configuration
 spring:
   application:
     name: api-gateway
 
-  # Cache Configuration (Caffeine)
   cache:
     type: caffeine
     caffeine:
@@ -42,11 +40,9 @@ spring:
                 allowed-headers: "*"
                 allow-credentials: false
 
-# Server Configuration
 server:
   port: 8080
 
-# Eureka Configuration
 eureka:
   client:
     service-url:
@@ -58,7 +54,6 @@ eureka:
     hostname: localhost
     instance-id: ${spring.application.name}:${server.port}
 
-# Actuator Configuration
 management:
   endpoints:
     web:
