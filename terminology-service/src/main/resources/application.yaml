@@ -11,18 +11,16 @@ spring:
     mongodb:
       uri: ${MONGO_URI:mongo-uri}
 
-# Eureka Configuration
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761}/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
 
-# Swagger/OpenAPI Configuration
 springdoc:
   api-docs:
     path: /api-docs
@@ -33,7 +31,6 @@ springdoc:
     tags-sorter: alpha
     filter: false
 
-# Management endpoints
 management:
   endpoints:
     web:
@@ -44,4 +41,4 @@ management:
       probability: 1.0
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+      endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans

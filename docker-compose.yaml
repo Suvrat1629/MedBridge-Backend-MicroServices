@@ -1,5 +1,4 @@
 services:
-  # MongoDB
   mongodb:
     image: mongo:7
     container_name: medbridge-mongodb
@@ -18,7 +17,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # Keycloak Identity Provider
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     container_name: medbridge-keycloak
@@ -41,7 +39,6 @@ services:
       retries: 5
       start_period: 60s
 
-  # Zipkin Tracing Server
   zipkin:
     image: openzipkin/zipkin:latest
     container_name: medbridge-zipkin
@@ -49,7 +46,6 @@ services:
       - "9411:9411"
     environment:
       - STORAGE_TYPE=mem
-      - JAVA_OPTS=-Xms512m -Xmx512m
     networks:
       - medbridge-net
     healthcheck:
@@ -58,7 +54,90 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-    restart: unless-stopped
+
+  eureka:
+    build:
+      context: ./eureka
+    container_name: medbridge-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - medbridge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8761/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: medbridge-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_URL: http://eureka:8761
+      KEYCLOAK_URL: http://keycloak:8080
+      ZIPKIN_URL: http://zipkin:9411
+    depends_on:
+      eureka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - medbridge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  fhir-service:
+    build:
+      context: ./fhir-service
+    container_name: medbridge-fhir-service
+    ports:
+      - "8085:8083"
+    environment:
+      EUREKA_URL: http://eureka:8761
+      ZIPKIN_URL: http://zipkin:9411
+    depends_on:
+      eureka:
+        condition: service_healthy
+    networks:
+      - medbridge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  terminology-service:
+    build:
+      context: ./terminology-service
+    container_name: medbridge-terminology-service
+    ports:
+      - "8082:8082"
+    environment:
+      EUREKA_URL: http://eureka:8761
+      MONGO_URI: mongodb://root:rootpassword@mongodb:27017/terminology?authSource=admin
+      ZIPKIN_URL: http://zipkin:9411
+    depends_on:
+      eureka:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - medbridge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 networks:
   medbridge-net:
